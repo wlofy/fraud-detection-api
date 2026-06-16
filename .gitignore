@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Data & model artifacts (large / regenerable)
+data/*.csv
+data/*.zip
+artifacts/*.joblib
+artifacts/*.pt
+artifacts/*.png
+!data/.gitkeep
+!artifacts/.gitkeep
+
+# Env
+.env
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

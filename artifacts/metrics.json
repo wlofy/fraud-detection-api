@@ -1,0 +1,27 @@
+{
+  "dataset": "synthetic",
+  "test_rows": 18000,
+  "test_frauds": 31,
+  "models": {
+    "isolation_forest": {
+      "pr_auc": 0.934047330342485,
+      "roc_auc": 0.9998653595170177,
+      "precision_at_k": 0.8709677419354839,
+      "threshold": 0.9761204504204753,
+      "precision_at_threshold": 0.7941176470588235,
+      "recall_at_threshold": 0.8709677419354839,
+      "f1_at_threshold": 0.8307692307692308,
+      "flagged": 34
+    },
+    "autoencoder": {
+      "pr_auc": 0.4883636243872482,
+      "roc_auc": 0.9990135340613494,
+      "precision_at_k": 0.5483870967741935,
+      "threshold": 0.9994778037071228,
+      "precision_at_threshold": 0.5142857142857142,
+      "recall_at_threshold": 0.5806451612903226,
+      "f1_at_threshold": 0.5454545454545454,
+      "flagged": 35
+    }
+  }
+}

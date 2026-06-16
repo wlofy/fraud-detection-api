@@ -1,0 +1,25 @@
+# Core ML / data
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+joblib>=1.4
+
+# Autoencoder (CPU build resolves automatically on Windows/Linux)
+torch>=2.5
+
+# API
+fastapi>=0.115
+uvicorn[standard]>=0.32
+pydantic>=2.9
+pydantic-settings>=2.6
+
+# Streaming (kafka-python-ng is the maintained fork; supports Python 3.13)
+kafka-python-ng>=2.2.3
+
+# Utilities
+requests>=2.32
+python-dotenv>=1.0
+
+# Dev / eval
+matplotlib>=3.9
+pytest>=8.3
