@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: fraud-detection-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SCORING_MODEL
+        value: isolation_forest
+      - key: CONTAMINATION
+        value: "0.0017"

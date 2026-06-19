@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fraud Detection API — live demo</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #131720;
+    --border: #232936;
+    --text: #e6e8ee;
+    --muted: #8a93a6;
+    --green: #2ec27e;
+    --red: #e5484d;
+    --blue: #3b82f6;
+    --amber: #f5a524;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px; }
+  h1 { font-size: 28px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 32px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin: 18px 0;
+  }
+  .panel h2 { font-size: 15px; font-weight: 600; margin: 0 0 12px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  button:hover { border-color: var(--blue); }
+  button.primary { background: var(--blue); border-color: var(--blue); }
+  button.danger { background: var(--red); border-color: var(--red); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  select, input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  label { color: var(--muted); font-size: 13px; margin-right: 6px; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 22px; font-weight: 600; margin-top: 4px; }
+  .verdict { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .verdict.fraud { background: rgba(229, 72, 77, 0.15); color: var(--red); border: 1px solid rgba(229, 72, 77, 0.4); }
+  .verdict.clean { background: rgba(46, 194, 126, 0.15); color: var(--green); border: 1px solid rgba(46, 194, 126, 0.4); }
+  pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 12px;
+    margin: 0;
+    color: var(--muted);
+  }
+  a { color: var(--blue); }
+  .status { font-size: 13px; color: var(--muted); }
+  .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .pulse.up { background: var(--green); box-shadow: 0 0 0 0 rgba(46, 194, 126, 0.5); animation: p 2s infinite; }
+  .pulse.down { background: var(--red); }
+  .pulse.warm { background: var(--amber); }
+  @keyframes p { 0% { box-shadow: 0 0 0 0 rgba(46, 194, 126, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(46, 194, 126, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 194, 126, 0); } }
+  .links a { margin-right: 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Fraud Detection API</h1>
+  <p class="sub">
+    Stripe-Radar-style real-time scoring. Isolation Forest + autoencoder trained on
+    the Kaggle credit-card schema (synthetic data when no real CSV is mounted).
+    <span class="links">
+      <a href="/docs" target="_blank">/docs</a>
+      <a href="/metrics" target="_blank">/metrics</a>
+      <a href="https://github.com/wlofy/fraud-detection-api" target="_blank">github</a>
+    </span>
+  </p>
+
+  <div class="panel">
+    <h2>Service</h2>
+    <div id="status" class="status"><span class="pulse warm"></span> checking…</div>
+  </div>
+
+  <div class="panel">
+    <h2>Score a transaction</h2>
+    <div class="row" style="align-items:center; margin-bottom:14px;">
+      <span>
+        <label>Model</label>
+        <select id="model">
+          <option value="isolation_forest">isolation_forest</option>
+          <option value="autoencoder">autoencoder</option>
+        </select>
+      </span>
+      <span>
+        <label>Seed</label>
+        <input id="seed" type="number" value="1" style="width:80px" />
+      </span>
+    </div>
+    <div class="row">
+      <button id="btnNormal" class="primary">Score normal transaction</button>
+      <button id="btnFraud" class="danger">Score fraud-like transaction</button>
+    </div>
+    <div id="result" style="margin-top:18px;"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Raw response</h2>
+    <pre id="raw">// click a button above</pre>
+  </div>
+
+</div>
+
+<script>
+// When the page is served by FastAPI (production), use same-origin paths.
+// When previewed as a standalone file (file://, about:blank, blob:), fall back
+// to a local dev server or to an explicit ?api=... override.
+const API_BASE = (() => {
+  const override = new URLSearchParams(location.search).get('api');
+  if (override) return override.replace(/\/$/, '');
+  if (/^https?:$/.test(location.protocol)) return '';  // same-origin
+  return 'http://localhost:8000';
+})();
+const url = (p) => API_BASE + p;
+
+async function checkHealth() {
+  const el = document.getElementById('status');
+  try {
+    const r = await fetch(url('/health'));
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    el.innerHTML = `<span class="pulse up"></span> healthy — model: <b>${j.model}</b>, dataset: <b>${j.dataset}</b>`;
+  } catch (e) {
+    el.innerHTML = `<span class="pulse warm"></span> warming up — models train on first boot (~30s). Retrying…`;
+    setTimeout(checkHealth, 3000);
+  }
+}
+
+async function score(label) {
+  const model = document.getElementById('model').value;
+  const seed = document.getElementById('seed').value || 1;
+  const result = document.getElementById('result');
+  const raw = document.getElementById('raw');
+  result.innerHTML = '<span class="status">scoring…</span>';
+  raw.textContent = '...';
+  try {
+    const r = await fetch(url(`/score/sample?label=${label}&seed=${seed}&model=${model}`));
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || r.status);
+    const verdict = j.is_fraud
+      ? '<span class="verdict fraud">flagged as fraud</span>'
+      : '<span class="verdict clean">cleared</span>';
+    result.innerHTML = `
+      <div class="result-grid">
+        <div class="stat"><div class="stat-label">Risk score</div><div class="stat-value">${j.risk_score.toFixed(4)}</div></div>
+        <div class="stat"><div class="stat-label">Threshold</div><div class="stat-value">${j.threshold.toFixed(4)}</div></div>
+        <div class="stat"><div class="stat-label">Verdict</div><div class="stat-value" style="font-size:16px; padding-top:2px">${verdict}</div></div>
+        <div class="stat"><div class="stat-label">Truth</div><div class="stat-value" style="font-size:16px; padding-top:2px">${label}</div></div>
+      </div>`;
+    raw.textContent = JSON.stringify(j, null, 2);
+  } catch (e) {
+    result.innerHTML = `<span class="verdict fraud">error: ${e.message}</span>`;
+    raw.textContent = String(e);
+  }
+}
+
+document.getElementById('btnNormal').onclick = () => score('normal');
+document.getElementById('btnFraud').onclick = () => score('fraud');
+checkHealth();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Slim runtime deps for Render free tier.
+# Excludes kafka, matplotlib, pytest (dev-only). Torch is installed CPU-only
+# in the Dockerfile via an explicit --index-url to keep the image lean.
+
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+joblib>=1.4
+fastapi>=0.115
+uvicorn[standard]>=0.32
+pydantic>=2.9
+pydantic-settings>=2.6
+python-dotenv>=1.0
